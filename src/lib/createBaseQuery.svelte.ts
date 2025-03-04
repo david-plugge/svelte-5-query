@@ -22,20 +22,20 @@ export function createBaseQuery<
 	const client = useQueryClient(queryClient);
 	const isRestoring = useIsRestoring();
 
-	const queryOptions = $derived(typeof options === 'function' ? options() : options);
-	const optionsWithDefaults = $derived.by(() => {
+	function getOptionsWithDefaults() {
+		const queryOptions = typeof options === 'function' ? options() : options;
 		const defaultedOptions = client.defaultQueryOptions(queryOptions);
 		defaultedOptions._optimisticResults = isRestoring ? 'isRestoring' : 'optimistic';
 		return defaultedOptions;
-	});
+	}
 
 	const observer = new Observer<TQueryFnData, TError, TData, TQueryData, TQueryKey>(
 		client,
-		optionsWithDefaults
+		getOptionsWithDefaults()
 	);
 
 	$effect(() => {
-		observer.setOptions(optionsWithDefaults, { listeners: false });
+		observer.setOptions(getOptionsWithDefaults(), { listeners: false });
 	});
 
 	let currentResult = observer.getCurrentResult();

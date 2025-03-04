@@ -15,15 +15,17 @@ export function createMutation<
 ): CreateMutationResult<TData, TError, TVariables, TContext> {
 	const client = useQueryClient(queryClient);
 
-	const mutationOptions = $derived(typeof options === 'function' ? options() : options);
+	function getMutationOptions() {
+		return typeof options === 'function' ? options() : options;
+	}
 
 	const observer = new MutationObserver<TData, TError, TVariables, TContext>(
 		client,
-		mutationOptions
+		getMutationOptions()
 	);
 
 	$effect(() => {
-		observer.setOptions(mutationOptions);
+		observer.setOptions(getMutationOptions());
 	});
 
 	let currentResult = observer.getCurrentResult();
